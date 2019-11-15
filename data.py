@@ -6,6 +6,7 @@ import skimage.io as io
 import skimage.transform as trans
 import cv2
 import warnings
+from collections import  Counter
 
 warnings.filterwarnings("ignore")
 
@@ -52,13 +53,13 @@ class data_preprocess:
                                   vertical_flip=True,
                                   horizontal_flip=True,
                                   fill_mode='nearest')
-        self.image_color_mode = "rgb"
-        self.label_color_mode = "rgb"
+        self.image_color_mode = "grayscale"
+        self.label_color_mode = "grayscale"
 
-        self.flag_multi_class = flag_multi_class
+        self.flag_multi_class = False
         self.num_class = num_classes
         self.target_size = (512, 512)
-        self.img_type = 'tif'
+        self.img_type = 'png'
 
     def adjustData(self, img, label):
         if (self.flag_multi_class):
@@ -76,7 +77,7 @@ class data_preprocess:
         return (img, label)
 
     def trainGenerator(self, batch_size, image_save_prefix="image", label_save_prefix="label",
-                       save_to_dir='/train_data', seed=7):
+                       save_to_dir=None, seed=7):
         '''
         can generate image and label at the same time
         use the same seed for image_datagen and label_datagen to ensure the transformation for image and label is the same
@@ -143,11 +144,55 @@ class data_preprocess:
             img, label = self.adjustData(img, label)
             yield (img, label)
         # return imgs,labels
-
-    def saveResult(self, npyfile, size, name,threshold=127):
+        
+    def cal_iou(self, predict, ground_true):
+        '''
+        计算分割图像与原图的iou
+        predict:预测的结果
+        ground_true:真实分割图的名字
+        '''
+        # 测试数据的真实标注图像位置，用来计算iou
+        label_path = './data/test/label/'
+        path = label_path + ground_true + '-profile.jpg'
+        try:
+            gt_img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            gt_img = cv2.resize(gt_img,(512,512))
+        except:
+            print(' Gt_img do not exsit!')
+            cv2.imshow('predict.jpg',predict)
+            cv2.waitKey(2000)
+            return None
+        predict = cv2.cvtColor(predict,cv2.COLOR_RGB2GRAY)
+        predict = cv2.resize(predict,(512,512))
+        cv2.imshow('predict.jpg',predict)
+        cv2.waitKey(20)
+        cv2.imshow('gt.jpg',gt_img)
+        cv2.waitKey(2000)
+        
+        predict = np.asarray(predict).astype(np.bool)
+        gt_img = np.asarray(gt_img).astype(np.bool)
+        predict = predict.flatten()
+        gt_img =  gt_img.flatten()
+        # print(gt_img)
+        # print(predict)
+        # print(len(predict),len(gt_img))
+        xor = np.logical_xor(predict, gt_img)  #这句要放在np.logical_not上面，不然会出现bug，是异或结果全为true
+        iou = np.logical_not(predict, gt_img)  #重叠部分
+        
+        # print(iou)
+        # print(xor)
+        sum = iou.sum() + xor.sum()
+        # print('iou:{}-xor:{}'.format(iou.sum(),xor.sum()))
+        if predict.shape != gt_img.shape:
+            raise ValueError("Shape mismatch: predict and gt_img must have the same shape.")
+        # print(np.count_nonzero(iou))
+        return iou.sum()/sum
+        
+    def saveResult(self, npyfile, size, name,img_raw,threshold=127):
         for i, item in enumerate(npyfile):
             img = item
             img_std = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
+            img_mask = np.zeros((img.shape[0], img.shape[1], 3), dtype=np.uint8)
             if self.flag_multi_class:
                 for row in range(len(img)):
                     for col in range(len(img[row])):
@@ -158,8 +203,14 @@ class data_preprocess:
                     for j in range(len(img[k])):
                         num = img[k][j]
                         if num < (threshold/255.0):
-                            img_std[k][j] = road
+                            img_std[k][j] = img_raw[k][j]
+                            img_mask[k][j] = road
                         else:
                             img_std[k][j] = BackGround
+                            img_mask[k][j]  = BackGround
+
             img_std = cv2.resize(img_std, size, interpolation=cv2.INTER_CUBIC)
+            img_mask = cv2.resize(img_mask, size, interpolation=cv2.INTER_CUBIC)
+            iou = self.cal_iou(img_mask, name)
+            print('iou:', iou)
             cv2.imwrite(os.path.join(self.save_path, ("%s_predict." + self.img_type) % (name)), img_std)
