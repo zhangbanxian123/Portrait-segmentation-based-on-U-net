@@ -15,7 +15,8 @@ Then you should set image type , image_color_mode and label_color_mode.
 
 change the data path and run the train.py to train you own model and test.py to predict the test images
 
-
+## Pretrained model
+You can download the pretrained model from :[baiduyun](https://pan.baidu.com/s/16YYLKk_f1EyygqN2AQ2MoQ)
 ### Results
 The binary classify model is trained for 30 epochs(300 step per epoch) in Kitti dataset.
 After 30 epochs, calculated accuracy is about 0.989, the loss is about 0.02
