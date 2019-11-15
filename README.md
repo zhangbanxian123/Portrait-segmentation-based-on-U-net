@@ -30,9 +30,6 @@ After 30 epochs, calculated valid accuracy is about 0.768, the loss is about 1.4
 Loss function for the training is categorical_crossentropy.
 
 
-Then you also can use label_visualization.py to visual your resut like this:
-![image/mask.png](image/mask.png)
-
 ## About
 Unet is More commonly used in medical areas.
 
