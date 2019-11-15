@@ -1,13 +1,4 @@
-### unet
-Keras implementation of unet.
-### Data
-You can download:
 
-Kitti dataset from here:http://www.cvlibs.net/download.php?file=data_road.zip
-
-CamVid dataset from here:https://github.com/preddy5/segnet/tree/master/CamVid
-
-### How to use
 ## Requirement
 - OpenCV
 - Python 3.6
@@ -29,19 +20,13 @@ change the data path and run the train.py to train you own model and test.py to 
 The binary classify model is trained for 30 epochs(300 step per epoch) in Kitti dataset.
 After 30 epochs, calculated accuracy is about 0.989, the loss is about 0.02
 Loss function for the training is basically just a binary crossentropy.
-![image/test.png](image/test.png)
-![image/test_predict.png](image/test_predict.png)
-
+![image/test1.png](image/test1.png)
+![image/test2.png](image/test2.png)
 
 
 The multi classify model is trained for 30 epochs(300 step per epoch) in Camvid dataset.
 After 30 epochs, calculated valid accuracy is about 0.768, the loss is about 1.43
 Loss function for the training is categorical_crossentropy.
-![image/camvid.png](image/Seq05VD_f03510.png)
-![image/camvid_predict.png](image/Seq05VD_f03510_predict.png)
-
-and the loss and accuracy curve in there:
-![image/acc&loss.png](image/loss&acc.png)
 
 
 Then you also can use label_visualization.py to visual your resut like this:
