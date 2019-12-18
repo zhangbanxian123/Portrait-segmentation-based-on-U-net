@@ -17,7 +17,7 @@ change the data path and run the train.py to train you own model and test.py to 
 
 ## Pretrained model
 You can download the pretrained model from :[baiduyun](https://pan.baidu.com/s/16YYLKk_f1EyygqN2AQ2MoQ),and put it in model/
-### Results
+## Results
 The binary classify model is trained for 30 epochs(300 step per epoch) in Kitti dataset.
 After 30 epochs, calculated accuracy is about 0.989, the loss is about 0.02
 Loss function for the training is basically just a binary crossentropy.
